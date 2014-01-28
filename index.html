@@ -684,8 +684,124 @@ contentType r = fmap snd $ find ((== hContentType) . fst) $ responseHeaders r</c
           </section>
           <section>
             <h2>Tests</h2>
+            <p>There are tests. Using scotty as a test server for the http calls.</p>
+            <p>Lots of details for scotty stuff we've seen before.</p>
+            <p>We'll skip them in the talk but they are on github to peek at.</p>
+          </section>
+        </section>
+        <section>
+          <h1>Internal.hs</h1>
+          <ul>
+            <li>Making the event actioners</li>
+          </ul>
+          <br/>          <br/>          <br/>
+          <p>Largely boring. Just gluing http calls together into event handlers.</p>
+          <p>We'll skip them unless we have time / interest.</p>
+        </section>
+        <section>
+          <section>
+            <h1>Hubbub.hs</h1>
+            <ul>
+              <li>Where it all comes together</li>
+            </ul>
+          </section>
+          <section>
+            <h2>Config & Environment</h2>
             <div class="fragment">
+              <p>Config for client to configure us.</p>
+              <p>Env for all of the state our code needs to run (TQueues, DbApi,etc)</p>
+              <p>
+                Constructor or accessors of HubbubEnv are not exported, so clients 
+                can't fiddle with it or inspect it.
+              </p>
             </div>
+          </section>
+          <section>
+            <h2>Public Functions</h2>
+            <div class="fragment">
+              <p>Initializer for either AcidState or SQLite</p>
+              <p>subscribe / publish just push onto the queues.</p>
+              <p>List just reads from the DbApi</p>
+              <p>All the real work happens asynchronously by the worker threads.</p>
+            </div>
+          </section>
+          <section>
+            <h2>Initialize Hubbub</h2>
+            <div class="fragment">
+              <p>Where the IO actions really become awesome.</p>
+              <p>Can just fork as many of the loops as we like.</p>
+              <p>They do their stuff until the main thread exits.</p>
+              <p>This part is ridiculously easy.</p>
+            </div>
+          </section>
+        </section>
+        <section>
+          <section>
+            <h1>Main.hs</h1>
+            <ul>
+              <li>Scotty app that calls the hubbub api.</li>
+            </ul>
+          </section>
+          <section>
+            <h2>The App</h2>
+            <div class="fragment">
+              <p>Wonderfully boring code.</p>
+              <p>None of the asynch bleeds into here.</p>
+              <p>Just really about parsing requests and giving outputs, as it should be.</p>
+            </div>
+          </section>
+        </section>  
+        <section>
+          <section>
+            <h1>Wrap up</h1>
+            <ul>
+              <li>Clearing up the crass lie in the title.</li>
+              <li>Haskell IO is actually awesome!</li>
+              <li>Good Resources for the Curious</li>
+              <li>Questions</li>
+            </ul>
+          </section>
+          <section>
+            <h2>Totally lied in the title</h2>
+            <p class="fragment">This code was pretty much all impure.</p>
+            <p class="fragment">Was that actually a big deal?</p>
+            <p class="fragment">Except for the type sigs, did you even notice?</p>
+            <p class="fragment">
+              Title should be: Haskell can do real world real stuff just as well as your favourite language!
+            </p>            
+          </section>
+          <section>
+            <h2>Haskell IO is actually awesome</h2>
+            <p class="fragment">I'd argue that we're actually better off in haskell.</p>
+            <p class="fragment">We just did asynch, non blocking code and it didn't even hurt (or involve Node.js).</p>
+            <p class="fragment">Laziness is a virtue (forever $ doStuff)</p>
+            <p class="fragment">
+              Furthermore the fact that IO is a value gives rise to lots of cool combinators (mapM,replicateM,etc)
+              that are reusable for other sequencey type things.
+            </p>
+          </section>
+          <section>
+            <h2>Core message</h2>
+            <p class="fragment">Don't listen to the FUD: Haskell can do real world things very well.</p>
+            <p class="fragment">Just look at how warp beats the pants off of node/python/etc <a href="http://www.yesodweb.com/blog/2011/03/preliminary-warp-cross-language-benchmarks">http://www.yesodweb.com/blog/2011/03/preliminary-warp-cross-language-benchmarks</a>.</p>
+          </section>
+          <section>
+            <h2>Resources for the curious</h2>
+            <p>This code: 
+              <a href="https://github.com/benkolera/haskell-hubbub/">https://github.com/benkolera/haskell-hubbub/</a>
+            </p>
+            <p>Search packages on hackage: <a href="http://hackage.haskell.org/">http://hackage.haskell.org/</a></p>
+            <p>Read LYAH: <a href="http://learnyouahaskell.com/">http://learnyouahaskell.com/</a></p>
+            <p>Hoogle: <a href="http://www.haskell.org/hoogle/">http://www.haskell.org/hoogle/</a></p>
+            <p>GHCi: run "cabal repl" in your project to get a repl. :t and :i do awesome things.</p>
+          </section>
+          <section>
+            <h2>Questions?</h2>
+            <ul>
+              <li>@benkolera</li>
+              <li>bkolera@irc.freenode.net#bpfg</li>
+              <li>ben.kolera@gmail.com</li>
+            </ul>
           </section>
         </section>
       </div>
