@@ -15,7 +15,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 		<link rel="stylesheet" href="css/reveal.min.css">
-		<link rel="stylesheet" href="css/theme/bens.css" id="theme">
+		<link rel="stylesheet" href="css/theme/solarized.css" id="theme">
 
 		<!-- For syntax highlighting -->
 		<link rel="stylesheet" href="lib/css/mono-blue.css">
@@ -67,7 +67,7 @@
               </div>
               <div>
                 <ul>
-                  <li><strike>Cabal Projects</strike></li>
+                  <li>Cabal Projects</li>
                   <li>Http Conduit</li>
                   <li>STM & TQueues</li>
                   <li>Acid State</li>
@@ -381,7 +381,7 @@ map putStrLn ["foo","bar"] :: [IO ()]</code></pre>
           <section>
             <h2>Build steps</h2>
             <div class="fragment">
-              <p>Initalize sandbox and install every dependency into box:</p>
+              <p>Initalize sandbox and install every dependency into the sandbox:</p>
               <pre><code class="bash">cabal sandbox init
 cabal install --enable-tests --flag=mocks --only-dependencies</code></pre>
               <p>Configure and run tests:</p>

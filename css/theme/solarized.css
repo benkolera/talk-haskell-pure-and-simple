@@ -10,6 +10,27 @@
   font-weight: normal;
   font-style: normal; }
 
+.reveal ul {
+    list-style-type: none;
+}
+
+.reveal ul li:before
+{
+    content: '\3bb';
+    font-size: 0.8em;
+    padding-top: 2px;
+    margin: 0 1em;    /* any design */
+}
+
+.vsplit div {
+    float: left;
+    width: 49%;
+}
+
+.vsplit div:last-child {
+    clear: right;
+}
+
 /**
  * Solarized colors by Ethan Schoonover
  */
