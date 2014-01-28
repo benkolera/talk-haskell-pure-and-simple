@@ -1,0 +1,724 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Haskell - Pure and Simple</title>
+
+		<meta name="description" content="Talk for the BFPG code diving through haskell-hubbub">
+		<meta name="author" content="Ben Kolera">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.min.css">
+		<link rel="stylesheet" href="css/theme/bens.css" id="theme">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/mono-blue.css">
+
+		<!-- If the query includes 'print-pdf', use the PDF print sheet -->
+		<script>
+			document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+			<div class="slides">
+        <section>
+          <section>
+            <h1>Haskell<br/><small>Pure & Simple</small></h1>
+            <p>Brisbane Functional Programming Group - <date>2014-01-28</date></p>
+          </section>
+          <section>
+            <h2>Purpose of this Talk</h2>
+            <p class="fragment">Show off some cool haskell code! :)</p>
+            <p class="fragment">Show that haskell can do lots of super useful things.</p>
+            <p class="fragment">Even in something that has lots of side effects.</p>
+            <p class="fragment">And that a degree in Category Theory is not required.</p>
+          </section>
+          <section>
+            <h2>Possible side effects</h2>
+            <p class="fragment">Feel comfortable with the basics of the haskell toolbox.</p>
+            <p class="fragment">Less afraid of haskell than what you are now. </p>
+            <p class="fragment">Have a glimpse of the beauty &amp; merit of the haskell way.</p>
+            <p class="fragment">Inspired to experiment and learn!</p>
+          </section>
+          <section>
+            <h2>Whirlwind Tour of</h2>
+            <div class="vsplit">
+              <div>
+                <ul>
+                  <li>Haskell Basics</li>
+                  <li>Scotty</li>
+                  <li>Tasty & HUnit</li>
+                  <li>SqLite Simple</li>
+                  <li>Aeson</li>
+                </ul>
+              </div>
+              <div>
+                <ul>
+                  <li><strike>Cabal Projects</strike></li>
+                  <li>Http Conduit</li>
+                  <li>STM & TQueues</li>
+                  <li>Acid State</li>
+                  <li>Websockets</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+          <section>
+            <h2>Talk Rules</h2>
+            <p class="fragment">We've got the rest of the meetup to talk. Plenty of time!</p>
+            <p class="fragment">Ask lots of questions if something isn't clear.</p>
+            <p class="fragment">Code is available on github so you can go through it later.</p>
+            <p class="fragment">We'll stop for a break whenever the pizza arrives.</p>
+          </section>
+        </section>
+        <section>
+          <section>
+            <h1>Haskell Basics</h1>
+          </section>
+          <section>
+            <h2>Haskell Modules</h2>
+            <pre><code class="haskell">module FizzBuzz (fizzbuzz) where
+
+import Control.Monad (mapM_)
+
+data Result = Number Integer | Fizz | Buzz | FizzBuzz deriving (Show,Eq)
+
+fizzbuzz :: IO ()
+fizzbuzz = mapM_ (print . result) [1..100]
+
+result :: Integer -> Result
+result n | n `mod` 15 == 0 = FizzBuzz
+         | n `mod` 5  == 0 = Fizz
+         | n `mod` 3  == 0 = Buzz
+         | otherwise       = Number n</code></pre>
+          </section>
+          <section>
+            <h2>Imports and Exports</h2>
+            <p class="fragment">Can be explicit or implict with both:</p>
+            <div class="fragment">
+            <pre><code class="haskell">module FizzBuzz (fizzbuzz) where
+import Control.Monad (mapM_)</code></pre>
+              vs
+<pre><code class="haskell">module FizzBuzz where
+import Control.Monad</code></pre>
+            </div>
+            <br/>
+            <p class="fragment">I prefer being explicit, so my code is less terse than some haskell code.</p>
+          </section>
+          <section>
+            <h2>Datatypes & Constructors</h2>
+            <p class="fragment">Constructors aren't types themselves.</p>
+            <div class="fragment">
+              <pre><code class="haskell">data Result = Number Integer | Fizz | Buzz | FizzBuzz deriving (Show,Eq)</code></pre>
+            </div>
+            <div class="fragment">
+              <p>Not possible:</p>
+              <pre><code class="haskell">printBuzz :: Buzz -> String</code></pre>
+            </div>
+            <div class="fragment">
+              <p>Can take a Result and match each constructor:</p>
+              <pre><code class="haskell">printResult :: Result -> String
+printResult Fizz       = "Fizz"
+printResult Buzz       = "Buzz"
+printResult FizzBuzz   = "FizzBuzz"
+printResult (Number n) = show n</code></pre>
+            </div>
+          </section>
+          <section>
+            <h2>Special Type Declarations</h2>
+            <div class="fragment">
+              <p>Alias (can be used interchangibly)</p>
+              <pre><code class="haskell">type FilePath = String</code></pre>
+            </div>
+            <div class="fragment">
+              <p>Newtype (cannot be used interchangibly)</p>
+              <pre><code class="haskell">newtype FilePath = FilePath String</code></pre>
+            </div>
+            <div class="fragment">
+              <p>Records (generates getters and setters</p>
+              <pre><code class="haskell">data FilePath = FilePath { dir::String , filename::String } </code></pre>
+            </div>            
+          </section>
+          <section>
+            <h2>Typeclasses</h2>
+            <div class="fragment">
+              <p>Polymorphism over disparate types.</p>
+              <pre><code class="haskell">print :: Show a => IO ()
+print a = putStrLn (show a)</code></pre>
+            </div>
+            <div class="fragment">
+              <p>And to define one for Result:</p>
+              <pre><code class="haskell">instance Show Result where
+  show Fizz       = "Fizz"
+  show Buzz       = "Buzz"
+  show FizzBuzz   = "FizzBuzz"
+  show (Number n) = show n</code></pre>
+            </div>
+          </section>
+          <section>
+            <h2>Function Application</h2>
+            <pre><code class="haskell">ghci> :t map 
+map :: (a -> b) -> [a] -> [b]</code></pre>
+            <div class="fragment">
+              <p>Is done with a space. Returns rest of the function:</p>
+              <pre><code>ghci> :t map (+1)
+map (+1) :: Num b => [b] -> [b]</code></pre>
+            </div>
+            <div class="fragment">
+              <p>Which can then be applied to get the result:</p>
+              <pre><code class="haskell">ghci> map (+1) [1,2,3]
+[2,3,4]</code></pre>
+            </div>
+          </section>
+          <section>
+            <h2>Functions & Precedence</h2>
+            <p class="fragment">Function application has highest precedence (10).</p>
+            <p class="fragment">Functions that don't start with a letter are infix.</p>
+            <p class="fragment">Can make a function infix with bacticks (5 `div` 2).</p>
+            <p class="fragment">Infix operators each have a precedence level.</p>
+            <p class="fragment">Composition (.) has 9 and ($) has 0.</p>
+            <p class="fragment">Safest way is to use parens where you feel like it.</p>
+            <p class="fragment">Hlint will tell you which parens are unnecessary.</p>
+          </section>
+          <section>
+            <h2>Lots of ways to make functions!</h2>
+            <p class="fragment">As top level functions / in let or where blocks.</p>
+            <div class="fragment">
+              <p>As Lambdas / anonymous functions:</p>
+              <pre><code class="haskell">ghci> :t (\a -> a + 1 )
+(\a -> a + 1 ) :: Num a => a -> a</code></pre>
+            </div>
+            <div class="fragment">
+              <p>As sections (better style than lambdas):</p>
+              <pre><code class="haskell">ghci> :t (+ 1)
+(+ 1) :: Num a => a -> a</code></pre>
+            </div>
+          </section>
+          <section>
+            <h2>Combining Functions</h2>
+            <div class="fragment">
+              <p>Composition:</p>
+              <pre><code class="haskell">ghci> :t show . (+1)
+show . (+1) :: (Num b, Show b) => b -> String
+ghci> show . (+1) $ (5::Int)
+"6"</code></pre>
+            </div>
+            <div class="fragment">
+              <p>Applicative:</p>
+              <pre><code class="haskell">ghci> import Control.Applicative
+ghci> import Data.Char
+ghci> :t liftA2 (||) isDigit isAlpha
+liftA2 (||) isDigit isAlpha :: Char -> Bool
+ghci> filter (liftA2 (||) isDigit isAlpha) "abcd34efg!.,'  "
+"abcd34efg"</code></pre>
+            </div>
+          </section>
+          <section>
+            <h2>And taking this further:</h2>
+            <pre><code class="haskell">import Data.Arrow 
+
+ghci> :t (***)
+(***) :: Arrow a => a b c -> a b' c' -> a (b, b') (c, c')
+
+ghci> :t (++"bar") *** (+9000)
+(++"bar") *** (+9000) :: Num a => ([Char], a) -> ([Char], a)
+
+ghci> (++"bar") *** (+9000) $ ("foo",0)
+("foobar",9000)
+
+ghci> :t join (***) (+1)
+join (***) (+1) :: Num a => (a, a) -> (a, a)
+
+ghci> join (***) (+1) $ (1,2)
+(2,3)</code></pre>
+            <p><em>(This is as weird as it gets, I promise!)</em></p>
+          </section>
+          <section>
+            <h2>Whitespace - Offside rule</h2>
+            <p class="fragment">Lines that start at the same level of indentation are different expressions.</p>
+            <p class="fragment">To continue the same expression on a new line, indent at least one space:
+            <div class="fragment"><pre><code class="haskell">do
+  x <- getXFromDatabase
+  y <- getYFromDatabase
+  return $ thisFunctionHasAReallyReallyLongNameSoINeedToPutTheParamsOnTheNextLine
+    x
+    y</code></pre></div>
+          </section>
+          <section>
+            <h2>IO</h2>
+            <pre><code class="haskell">ghci> :t putStrLn
+putStrLn :: String -> IO ()
+
+ghci> :t getLine
+getLine :: IO String
+
+ghci> :t map putStrLn ["foo","bar"] --List of IO that are never run!
+map putStrLn ["foo","bar"] :: [IO ()]</code></pre>
+            <p>
+              Are actions that are run by the RTS only if the action is sequenced to the main function.
+            </p>
+            <p>IO actions are values. Can do some useful things with them.</p>
+            <p>There is (almost) no way to get a value out of IO. Can only sequence with other IO.</p>
+          </section>
+          <section>
+            <h2>IO - Example</h2>
+            <pre><code>main = do 
+  fromHandle <- getAndOpenFile "in.txt" ReadMode
+  toHandle   <- getAndOpenFile "ALLCAPS.txt" WriteMode 
+  contents   <- hGetContents fromHandle
+  hPutStr toHandle $ map toUpper contents
+  hClose toHandle
+  putStr "DONE!!!"</code></pre>
+            <p>Hint: Separating the execution of the IO action from the program code that generates it turns out to be super duper useful!</p>
+          </section>
+          <section>
+            <h2>Monads</h2>
+            <p>Lots and lots of things require some kind of sequencing bits of stuff.</p>
+            <p>IO is one such thing, but there are lots of others and we'll see few.</p>
+            <p>Do notation and monad combinators is just a DSL for sequencing and manipulating these bits.</p>
+            <p>Not a burrito.</p>
+          </section>
+          <section>
+            <h2>Strings vs Text vs ByteString</h2>
+            <p>String is a list of Characters (Obsolete)</p>
+            <p>Text is a lazy or strict unicode data structure. Fast and correct.</p>
+            <p>ByteString is lazy or strict binary data structure. Must choose a decoding method yourself (ASCII,utf8,etc) to get to String or Text.</p>
+            <p>Overloaded strings extension means that string literals can either be String,Text or ByteString.</p>
+            <p>Going from lazy to strict involves reading everything into memory.</p>
+          </section>
+        </section>
+        <section>
+          <section>
+            <h1>PubSubHubbub</h1>
+            <blockquote cite="https://code.google.com/p/pubsubhubbub/">
+              <p>A simple, open, server-to-server webhook-based pubsub (publish/subscribe) protocol for any web accessible resources.</p>
+              <p>Parties (servers) speaking the PubSubHubbub protocol can get near-instant notifications (via webhook callbacks) when a topic (resource URL) they're interested in is updated.</p>
+            </blockquote>
+          </section>
+          <section>
+            <h2>Protocol</h2>
+            <ol>
+              <li>Subscriber program requests a atom/rss resource from the publisher.</li>
+              <li>Publisher includes URL of hub that the subscriber can use to subscribe.</li>
+              <li>Subscriber registers a callback URL with the hub.</li>
+              <li>
+                Upon updating the resource, the publisher lets the hub know and the hub 
+                distributes the new feed to subscribers by posting the content to each callback URL.
+              </li>
+            </ol>
+          </section>
+          <section>
+            <h2>Subscription: Finer Deets</h2>
+            <p>Subscripion takes an optional secret.</p>
+            <p>Subscriptions must be 202 accepted and then verified with the subscriber.</p>
+            <p>Verification involves calling GET on the callback url with the topic, and a challenge. Subscriber must return a 200 OK with the challenge in the body.</p>
+            <p>Subscription also optionally includes a secret string shared to the hub. The hub must hmac sign the http body of any content distribution if it was given.</p>
+          </section>
+          <section>
+            <h2>Why is this useful?</h2>
+            <p>Low latency and publisher friendly feed consumers (read: news readers)!</p>
+            <p>At work, our internal services publish event streams via atom feeds.</p>
+            <p>Nice solution as PubSubHubbub allows consumers to be push or pull based as required.</p>
+          </section>
+          <section>
+            <h2>Demo</h2>
+          </section>
+          <section>
+            <h2>Pieces of the Puzzle</h2>
+            <p>Publisher.hs: Scotty web server that allows post creation from a browser.</p>
+            <p>
+              Subscriber.hs: Scotty web server that subscribes to hub, listen for callbacks 
+              and pushes the updated post list to the browser via a websocket.
+            </p>
+            <p>Main.hs: The actual PubSubHubbub scotty web server.</p>
+          </section>
+          <section>
+            <h2>That sounds like a lot of state!</h2>
+            <p>Lots of asynchronicity and state needed. Very few pure bits.</p>
+            <p>Can haskell even do this in a nice way?!?</p>
+            <p>Haskell-hubbub was my experimentation to help answer this.</p>
+            <p>TL;DR: The answer is 'definitely yes'. :)</p>
+          </section>
+        </section>          
+        <section>
+          <section>
+            <h1>Cabal</h1>
+          </section>
+          <section>
+            <h2>Cabal is a build tool</h2>
+            <p class="fragment">Use it for any non-throwaway program.</p>
+            <p class="fragment">Akin to sbt/lein/mvn/gradle/gem/pip/etc.</p>
+            <p class="fragment">Package can product one or more libraries and/or binaries.</p>
+            <p class="fragment">Can also have testsuites and benchmarks that aren't compiled into the final artifacts.</p>
+            <p class="fragment">Pulls dependencies from hackage.haskell.org.</p>
+            <p class="fragment">Builds c code, links external libraries</p>
+            <p class="fragment">And lots more!</p>
+          </section>
+          <section>
+            <h2>haskell-hubbub Build Configuration</h2>
+            <p>Library code in src/, tests in test/ and binary entry points at top level. (Main.hs,Publisher.hs,Subscriber.hs)</p>
+            <p>Three different build options:
+              <ul>
+                <li>Hubbub Library and hubbub binary.</li>
+                <li>Library plus hubbub and mock binaries.</li>
+                <li>Library and test cases only</li>
+              </ul>
+            </p>
+          </section>
+          <section>
+            <h2>Build steps</h2>
+            <div class="fragment">
+              <p>Initalize sandbox and install every dependency into box:</p>
+              <pre><code class="bash">cabal sandbox init
+cabal install --enable-tests --flag=mocks --only-dependencies</code></pre>
+              <p>Configure and run tests:</p>
+              <pre><code class="bash">cabal configure --enable-tests --flag=tests #Only needs to be done once.
+cabal test</code></pre>
+              <p>Build everything including mock binaries:
+              <pre><code class="bash">cabal configure --flag=mock #Only needs to be done once.
+cabal build
+dist/build/hubbub/hubbub 
+dist/build/hubbub-mock-publisher/hubbub-mock-publisher
+dist/build/hubbub-mock-subscriber/hubbub-mock-subscriber</code></pre>
+          </section>
+          <section>
+            <h2>Note! This is just my Setup</h2>
+            <p>Cabal is extraordinarily flexible. Can set it up however you like.</p>
+            <p>This just works best for me. Other packages set things up differently.</p>
+            <p>Helps to see this as it is quite confusing at first.</p>
+          </section>
+        </section>
+        <section>
+          <section>
+            <h1>Publisher.hs</h1>
+            <ul>
+              <li>Scotty</li>
+              <li>Acid State</li>
+              <li>Http-Conduit</li>
+              <li>Blaze-Html</li>
+            </ul>
+          </section>          
+          <section>
+            <h2>Acid State Code Dive</h2>
+            <div class="fragment">
+              <p>Declare the datatypes with standard haskell.</p>
+              <p>Use safecopy for versioned serialisation.</p>
+              <p>Make transactions in Query and Update contexts.</p>
+              <p>Can build bigger Queries/Updates out of others.</p>
+              <p>Make acidic build the top level transactions that are written to the logs.</p>
+            </div>
+          </section>
+          <section>
+            <h2>Scotty</h2>
+            <div class="fragment">
+              <p>Two different contexts: ScottyM and ActionM.</p>
+              <p>ScottyM is for configuring scotty (routes, middleware).</p>
+              <p>ActionM is for parsing the request and producing a response.</p>
+              <p>These contexts, like IO have a Monad interface so we reuse do notation with them.</p>
+              <p>Able to lift IO actions into either context with liftIO.</p>
+            </div>
+          </section>
+          <section>
+            <h2>Http Conduit</h2>
+            <div class="fragment">
+              <p>Lots more to conduit that we see here.</p>
+              <p>Implements a streaming interface so that you can stream to disk / other sockets.</p>
+              <p>Works well for simple things too!</p>
+            </div>
+          </section>
+          <section>
+            <h2>Blaze Html</h2>
+            <div class="fragment">
+              <p>Yet another monad: sequences HTML elements together. Reuse of do notation, forM, etc is very handy.</p>
+              <p>Everything is guaranteed to be escaped.</p>
+              <p>Bit verbose, though. Hamlet is a quasiquoter built on top that can help.</p>
+            </div>
+          </section>          
+        </section>
+        <section>
+          <section>
+            <h1>Subscriber.hs</h1>
+            <ul>
+              <li>STM.TVars</li>
+              <li>Websockets</li>
+          </section>          
+          <section>
+            <h2>TVars</h2>
+            <div class="fragment">
+              <p>Container that has a value. Value can be replaced.</p>
+              <p>Part of STM (Software Transactional Memory).</p>
+              <p>Build up STM actions and run the action with atomically to execute it.</p>
+              <p>Anything that has the var can atomically read/write its value.</p>
+              <p>We use this for sharing an in memory database of websocket connections.</p>
+            </div>
+          </section>
+          <section>
+            <h2>Websockets</h2>
+            <div class="fragment">
+              <p>Set an intercept handler for new websocket connections in wai.</p>              
+              <p>We create an IO action that handles all comms for that socket.</p>
+              <p>IO action runs forever until the connection disconnects.</p>
+              <p>Upon disconnect, the IO action will remove the connection from the shared state.</p>
+              <p>Distribute pushes payload down each connection.</p>
+            </div>
+          </section>
+        </section>
+        <section>
+          <section>
+            <h1>Hubbub Library Structure</h1>
+          </section>
+          <section>
+            <h2>Library</h2>
+            <pre><code class="bash">src/Network/Hubbub.hs                       # Top API (client talks to this).
+src/Network/Hubbub/Http.hs                  # Http calls to the Pubs and Subs.
+src/Network/Hubbub/Hmac.hs                  # Hmac signs bits of text
+src/Network/Hubbub/Queue.hs                 # Handles queuing of events.
+src/Network/Hubbub/Internal.hs              # Actions events.
+src/Network/Hubbub/SubscriptionDb.hs        # Generics Api to persist Subs.
+src/Network/Hubbub/SubscriptionDb/Acid.hs   # AcidState impl of DbApi
+src/Network/Hubbub/SubscriptionDb/SqLite.hs # SQLite impl of DbApi.</code></pre>
+          </section>
+          <section>
+            <h2>Test Structure</h2>
+            <pre><code class="bash">test/Test.hs                                      # Main for tests
+test/Network/Hubbub/TestHelpers.hs                # Various helper funcs
+test/Network/Hubbub/Test.hs                       # Test for Hubbub.hs
+test/Network/Hubbub/Queue/Test.hs                 # Test for Queue.hs
+test/Network/Hubbub/Http/Test.hs                  # etc.
+test/Network/Hubbub/Hmac/Test.hs
+test/Network/Hubbub/SubscriptionDb/Test.hs
+test/Network/Hubbub/SubscriptionDb/Acid/Test.hs
+test/Network/Hubbub/SubscriptionDb/SqLite/Test.hs
+test/Network/Hubbub/Internal/Test.hs</code></pre>
+          </section>
+        </section>          
+        <section>
+          <section>
+            <h1>SubscriptionDb.hs</h1>
+            <ul>
+              <li>Hubbub DB Interface</li>
+            </ul>
+          </section>
+          <section>
+            <h2>Datatypes</h2>
+            <div class="fragment">
+              <p>Holds everything about a subscription that we need to distribute content to it and expire subscriptions.</p>
+              <p>Newtypes so that we cannot mix things up.</p>
+              <p>Having a type for HttpResource is a bit pedantic. Saves having a string (which may not be a URL) or having a Network.URL (which may be relative or not for HTTP) causing issues later.</p>
+            </div>
+          </section>
+          <section>
+            <h2>Interface</h2>
+            <div class="fragment">
+              <p>Just defines all of the functions we need for the API.</p>
+              <p>Just a datatype with record accessors. Zero magic.</p>
+              <p>EitherT can be an error or a good result. Encourages catching exceptions in the impl.</p>
+            </div>
+          </section>
+        </section>          
+        <section>
+          <section>
+            <h1><small>SubscriptionDb/SqLite.hs</small></h1>
+            <ul>
+              <li>SQLite Simple</li>
+            </ul>
+          </section>
+          <section>
+            <h2>To/From Row/Field Instances</h2>
+            <div class="fragment">
+              <p>toRow goes from a thing to a list of fields.</p>
+              <p>fromRow and fromField return RowParsers.</p>
+              <p>A row parser is a sequential thing that steps through the columns of a result set and returns 
+                whether it found what it was looking for or not.</p>
+              <p>RowParser is a Monad and an Applicative.</p>
+              <p>Use applicative <$> to lift constructor into RowParser and apply to many RowParsers. </p>
+            </div>
+          </section>
+          <section>
+            <h2>DbApi Implementation</h2>
+            <div class="fragment">
+              <p>Currying works awesomely for filling in the SqLite specific bit.</p>
+              <p>There is an IsString instance for Query, thus string literal are Querys.</p>
+              <p>fmap (fmap func) is to fmap IO then fmap the list inside.</p>
+              <p>
+                ToRow is used to convert params into columns. Only is to take a single thing that has a toField
+                and make a toRow out of it.
+              </p>
+            </div>            
+          </section>
+        </section>
+        <section>
+          <section>
+            <h1><small>SubscriptionDb/SqLite/Test.hs</small></h1>
+            <ul>
+              <li>Tasty</li>
+              <li>HUnit</li>
+            </ul>
+          </section>
+          <section>
+            <h2>Tasty</h2>
+            <div class="fragment">
+              <p>Tasty provides a way to group tests into trees.</p>
+              <p>Allows multiple ways to test (HUnit,Quickcheck,Smallcheck)</p>
+              <p>Test tree from this file is imported by SubscriptionDb/Test.hs.</p>
+              <p>Test tree from this SubscriptionDb/Test.hs is imported by test/Test.hs.</p>
+            </div>
+          </section>
+          <section>
+            <h2>HUnit</h2>
+            <div class="fragment">
+              <p>Deals with making assertions. Throws exceptions if not met.</p>
+              <p>Assertion is just IO () so can do anything in tests.</p>
+              <p>assertFail and @?= are enough for my use.</p>
+            </div>
+          </section>
+        </section>
+        <section>
+          <section>
+            <h1><small>SubscriptionDb/Acid.hs</small></h1>
+            <ul>
+              <li>Final note on AcidState</li>
+            </ul>
+          </section>
+          <section>
+            <h2>AcidState Implementation</h2>
+            <div class="fragment">
+              <p>
+                Combining multiple other transactions in expireSubscriptions, 
+                using do notition and mapM_ monad machinery to help.
+              </p>
+              <p>DbApi implementation just takes advantage of currying once again.</p>
+            </div>
+          </section>
+        </section>
+        <section>
+          <section>
+            <h1>Queue.hs</h1>
+            <ul>
+              <li>Definition of Hubbub events</li>
+              <li>STM.TQueue</li>
+              <li>Automatic Retries</li>
+            </ul>
+          </section>
+          <section>
+            <h2>Events & Retryable Class</h2>
+            <div class="fragment">
+              <p>Datatypes for Subscription,Publication and Distribution Events</p>
+              <p>Retryable just gives a polymorphic way of extracting/incrementing the attempt count.</p>
+              <p>Also allows retry delay to be implemented differently depending on the type.</p>
+              <p>Allows the queue to work on all Retryable events without sub typing.</p>
+            </div>
+          </section>
+          <section>
+            <h2>Queue Loop</h2>
+            <div class="fragment">
+              <p>Takes an event actioner, error handler and a queue of retryables.</p>
+              <p>Atomically dequeues (or blocks waiting for an event) from the queue.</p>
+              <p>Requeues failed events based on the retry delay.</p>
+              <p>IO Action never returns. This is actually not a problem!</p> 
+            </div>
+          </section>
+          <section>
+            <h2>Queue Tests</h2>
+            <div class="fragment">
+              <p>Because all the IO is lazy, we can test a lot here without too much boilerplate.</p>
+              <p>forkIO is a way to run any IO action in a different green thread.</p>
+              <p>Mutable vars let us collect the state from the other threads.</p>
+              <p>
+                And this is important, because any code that needs a sleep 100ms 
+                in a test just to pass needs a lot of testing! ;) 
+              </p>
+            </div>
+          </section>
+        </section>
+        <section>
+          <section>
+            <h1>Http.hs</h1>
+            <ul>
+              <li>Get remote resource of a PublishEvent</li>
+              <li>Distribute content of a DistributionEvent</li>
+              <li>Verify a subscription with the subscriber</li>
+            </ul>
+          </section>
+          <section>
+            <h2>Get Resource</h2>
+            <div class="fragment">
+              <p>Gets the content type and body of the topic of a publication event.</p>
+              <pre><code class="haskell">httpResourceToRequest . fromTopic . publicationTopic $ ev
+-- is the same as
+httpResourceToRequest (fromTopic  (publicationTopic ev))</code></pre>
+              <p>&&& ("fanout") is from Arrow that applies both functions to the response and returns a tuple.</p>
+              <pre><code class="haskell">contentType = fmap snd . find ((== hContentType) . fst) . responseHeaders
+-- is the same as
+contentType r = fmap snd $ find ((== hContentType) . fst) $ responseHeaders r</code></pre>
+            </div>
+          </section>
+          <section>
+            <h2>Distribute</h2>
+            <div class="fragment">
+              <p>Just assembles the post request from the event. Nothing fancy. </p>
+            </div>
+          </section>
+          <section>
+            <h2>Verify Subscription</h2>
+            <div class="fragment">
+              <p>Pattern matching on constructor to get mode.</p>
+              <p>Takes a random number generator as a param.</p>
+              <p>Needs to keep query params from original callback, so filter out hub ones from input.</p>
+              <p>Generates random challenge and checks response.</p>
+              <p>handleT from the Errors library to recover from NotFound.</p>
+            </div>
+          </section>
+          <section>
+            <h2>Tests</h2>
+            <div class="fragment">
+            </div>
+          </section>
+        </section>
+      </div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
